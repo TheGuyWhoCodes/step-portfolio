@@ -139,6 +139,16 @@ p.small {
 	background-image: url("img/portfolio/spotify.png");
 }
 
+.sep {
+    height:15px;
+}
+
+.hero {
+    text-align: center;
+    display:block;
+    margin: auto;
+}
+
 @media (min-width: 768px) {
     .h-md-100 { 
         height: 100vh; 
