@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Christopher Ariagno :: STEP Intern</title>
         <link rel="stylesheet" href="style.css">
+        <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
         <link rel = "stylesheet" href = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     </head>
     <body>
@@ -29,13 +30,131 @@
                             <h6>Basketball and Video Game Enthusiast</h6>
                             <div class = "sep"></div>
                             <h3>About Me 🤠</h3><br/>
-                            <h3>Portfolio 📂</h3><br/>
+                            <h3 onClick = "scrollToElement(portfolioPix)">Portfolio 📂</h3><br/>
                             <h3>Blog 🧠</h3><br/>
                             <h3>Contact Me 👀</h3>
                         </div>
                     </div>
                 </div>          
             </div>         
+        </div>
+
+        <div id = "portfolio">
+            <h1 class ="portfolio-header">Portfolio</h1>
+            <div class="container">
+                <div class="card-deck mb-3 text-center">
+                <div class="col-lg-4">
+                    <div class = "portfolio-card tf2skins">
+                    <div class="card-overlay">
+                        <article>
+                            <div class = "portfolio-card-header">tf2skins.co</div>
+                            <p class = "portfolio-sub">TF2Skins.co was a site built using LAMP to price check weapon skins in the popular
+                            shooter game Team Fortress 2.
+                            </p>
+                            <p class = "small">PHP, MySQL, VPS Setup, UI/UX</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class = "portfolio-card tracker">
+                    <div class="card-overlay">
+                        <article>
+                        <div class = "portfolio-card-header">trackerino.com</div>
+                        <p class = "portfolio-sub">Built using Node and Express, trackerino is a site to track your packages from the top four big US couriers. 
+                        </p>
+                        <p class = "small">Node, Express, UI/UX, APIs</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class = "portfolio-card lifttracker">
+                    <div class="card-overlay">
+                        <article>
+                        <div class = "portfolio-card-header">LiftTracker</div>
+                        <p class = "portfolio-sub">LiftTracker is a library for FRC teams to use in order to track vision targets on the game field. Won two Innovation awards. 
+                        </p>
+                        <p class = "small">Java, OpenCV, Raspberry Pi, Tegra TK1</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                </div>
+        
+                <div class="card-deck mb-3 text-center">
+                <div class="col-lg-4">
+                    <div class = "portfolio-card caniac">
+                    <div class="card-overlay">
+                        <article>
+                            <div class = "portfolio-card-header">Caniac Robot</div>
+                            <p class = "portfolio-sub">FRC code base that features an adaptive pure pursuit controller, motion profiling, multiple PID controllers, and custom built SmartDashboard.
+                            </p>
+                            <p class = "small">Java, Reflections, Automatic Systems, Python</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class = "portfolio-card hawk">
+                    <div class="card-overlay">
+                        <article>
+                        <div class = "portfolio-card-header">Hawk Track</div>
+                        <p class = "portfolio-sub">Built for the HackKU hackathon, Hawk Track uses Python to track how many people are around a given area in order to see if an area is busy.
+                        </p>
+                        <p class = "small">Python, HTML, CSS, Firebase, Raspberry Pi</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class = "portfolio-card car">
+                    <div class="card-overlay">
+                        <article>
+                        <div class = "portfolio-card-header">Car Chrome Extension</div>
+                        <p class = "portfolio-sub">Built for a car dealership, this Chrome Extension aids car purchasers on eBay, Craigslist, AutoTrader, and cars.com to find the best deal.</p>
+                        <p class = "small">JavaScript, HTML, CSS, Site manipulation</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class = "portfolio-card jeop">
+                    <div class="card-overlay">
+                        <article>
+                        <div class = "portfolio-card-header">Jeopardy Search Engine</div>
+                        <p class = "portfolio-sub">Built for the Capital One Summit, this site is a search engine for all Jeopardy questions with a live simulator</p>
+                        <p class = "small">Angular, Ruby on Rails, PostgresSQL</p>
+                        </article>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class = "portfolio-card lync">
+                        <div class="card-overlay">
+                            <article>
+                            <div class = "portfolio-card-header">lync.rip</div>
+                            <p class = "portfolio-sub">lync.rip allows for users to convert multiple links into a shortened URL. Deployed to GCP using Docker and Kubernetes</p>
+                            <p class = "small">Angular, GoLang, GCP, Kubernetes, Heroku, Docker</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class = "portfolio-card spotify">
+                        <div class="card-overlay">
+                            <article>
+                            <div class = "portfolio-card-header">Spotify Quarantine</div>
+                            <p class = "portfolio-sub">Spotify Quarantine allows users to checkout their listening history during COVID-19 lockdown.</p>
+                            <p class = "small">Angular, GitHub Pages, Canvas</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
         </div>
         <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
         <script src = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
