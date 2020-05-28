@@ -6,6 +6,10 @@ html {
     background: #0F9D58;
 }
 
+a {
+    color:black !important;
+}
+
 .headshot {
     border-radius: 50%;
     width:300px;
