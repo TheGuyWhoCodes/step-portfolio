@@ -31,6 +31,15 @@ h3 {
     margin: auto;
 }
 
+.about-me {
+    margin: 40px auto;
+    max-width: 650px;
+    line-height: 1.6;
+    font-size: 18px;
+    color: #444;
+    padding: 0 10px;
+}
+
 #portfolio {
 	z-index: 2;
 	vertical-align:top;
@@ -159,5 +168,8 @@ p.small {
     .headshot {
         width:40% !important;
         height:50% !important;
+    }
+    #world {
+        display:none;
     }
 }
