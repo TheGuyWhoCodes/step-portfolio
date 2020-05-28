@@ -18,6 +18,134 @@ html {
 h3 {
     text-decoration: underline;
     text-decoration-style: dashed;
+    cursor: pointer;
+}
+
+.sep {
+    height:15px;
+}
+
+.hero {
+    text-align: center;
+    display:block;
+    margin: auto;
+}
+
+.about-me {
+    margin: 40px auto;
+    max-width: 650px;
+    line-height: 1.6;
+    font-size: 18px;
+    color: #444;
+    padding: 0 10px;
+}
+
+#portfolio {
+	z-index: 2;
+	vertical-align:top;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	text-align: center;
+	margin: -10px 0 0 0;
+}
+
+.portfolio-header {
+	margin-top:1em;
+	font-family: 'Josefin Sans', sans-serif;
+	font-size:4rem;
+	color: #1a1c1d;
+    font-weight:600;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+}
+.portfolio-card {
+    position: relative;
+    background-size: cover;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1.7rem;
+    transition: 0.25s;
+    height:293px;
+    background-position: center; 
+}
+.card-overlay {
+	background: rgba(0, 0, 0, 0.7);
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    transition: 0.25s;
+}
+
+#potfolio h3{
+	padding-top: 3rem;
+	color:#Fff;
+	font-size: 5rem;
+	font-family: 'Baloo Paaji', cursive;
+}
+
+.portfolio-card-header {
+    padding-top: 3rem;
+	color:#Fff;
+	font-size: 4.5rem;
+	font-family: 'Josefin Sans', sans-serif;
+	font-size: 2.2rem;
+}
+
+.portfolio-sub {
+	color: #fff;
+}
+.portfolio-card article {
+	padding-left: 30px;
+	padding-right: 30px;
+    position: relative;
+	z-index: 10;
+}
+
+.portfolio-card article p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+p.small {
+	font-size: 14px;
+    opacity: 0.65;
+}
+
+.tf2skins {
+    background-image: url("img/portfolio/tf2skins.png");
+}
+
+.lifttracker {
+	background-image: url("img/portfolio/lifttracker.jpg");
+}
+
+.caniac {
+	background-image: url("img/portfolio/caniac.jpg");
+}
+
+.car {
+	background-image: url("img/portfolio/car.png");
+}
+
+.hawk {
+	background-image: url("img/portfolio/hawk.png");
+}
+
+.tracker {
+	background-image: url("img/portfolio/tracker.png");
+}
+.jeop {
+	background-image: url("img/portfolio/jeopy.PNG");
+}
+
+.lync {
+	background-image: url("img/portfolio/lync.png");
+}
+
+.spotify {
+	background-image: url("img/portfolio/spotify.png");
 }
 
 .sep {
@@ -40,5 +168,8 @@ h3 {
     .headshot {
         width:40% !important;
         height:50% !important;
+    }
+    #world {
+        display:none;
     }
 }
