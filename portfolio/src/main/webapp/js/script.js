@@ -36,3 +36,9 @@ var handleWindowResize = function () {
 }
 animate();
 
+
+window.onload = () => {
+    fetch("/data").then(e => e.text()).then((resp) => {
+        document.getElementById("serv-resp").innerText = resp
+    })
+}
