@@ -6,6 +6,29 @@ html {
     background: #0F9D58;
 }
 
+a {
+    color:black !important;
+}
+
+table {
+    margin: 0px auto;
+    margin-bottom:3em;
+}
+
+table a {
+    color:blue !important;
+}
+
+ul {
+    text-align: center;
+    list-style-position: inside;
+}
+tr {
+    background: transparent;
+    border-bottom: 1px solid #dadce0;
+    border-top: 0;
+    height: 48px;
+}
 .headshot {
     border-radius: 50%;
     width:300px;
