@@ -25,7 +25,6 @@ import java.util.*;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-
     List<String> commments = Arrays.asList("Comment 1", "Comment 2", "Comment 3");
 
     @Override
@@ -34,4 +33,5 @@ public class DataServlet extends HttpServlet {
         Gson gson = new Gson();
         response.getWriter().println(gson.toJson(commments));
     }
+
 }
