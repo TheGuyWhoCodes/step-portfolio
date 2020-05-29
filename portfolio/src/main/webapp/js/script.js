@@ -38,7 +38,15 @@ animate();
 
 
 window.onload = () => {
-    fetch("/data").then(e => e.text()).then((resp) => {
-        document.getElementById("serv-resp").innerText = resp
+    fetch("/data").then(e => e.json()).then((resp) => {
+        for(comment of resp) {
+            commentSection = document.getElementById("comment-section");
+
+            let newComment = document.createElement("div")
+            newComment.classList.add("comment")
+            let text = document.createTextNode(comment)
+            newComment.appendChild(text)
+            commentSection.appendChild(newComment)
+        }
     })
 }
