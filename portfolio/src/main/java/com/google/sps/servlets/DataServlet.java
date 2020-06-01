@@ -38,6 +38,14 @@ public class DataServlet extends HttpServlet {
     final RateLimiter commentPostLimiter = RateLimiter.create(10.0); 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+	/**
+    *   this doGet() function will write out the List of comments to JSON
+    *   We also use the commentGetLimiter to limit requests to 100 / sec. If it
+    *   Goes over this values, it'll pause and wait until the rate limit has been
+    *   reset
+    *   request: the incoming user request, (should be empty)
+    *   response: the response that we will send, usually the array of comments
+    **/
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	response.setContentType("application/json;");
@@ -46,6 +54,15 @@ public class DataServlet extends HttpServlet {
         response.getWriter().println(gson.toJson(comments));
     }
 
+
+	/**
+    *   this doPost() function will write the comments to the Datastore instance.
+    *   It reads in a name and comment from a query param to write to datastore
+    *   It has a similar rate limiter to the do get, if it sees more than 10 req /sec,
+    *   it'll pause and wait till the Rate Limit resets
+    *   request: the incoming user request, (should be empty as we use query params)
+    *   response: the response that we will send, normally nothing gets returned, only a 200 or 500
+    **/
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
@@ -53,6 +70,10 @@ public class DataServlet extends HttpServlet {
         comments.add(getPostComment(request));
     }
 
+	/**
+    *   getPostComment() is a helper function used to get the comment parameter of the body
+    *   request: the incoming http request to parse it from.
+    **/
     private String getPostComment(HttpServletRequest request) {
         return request.getParameter("comment");
     }
