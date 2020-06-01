@@ -22,16 +22,33 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays; 
 import com.google.gson.Gson;
 import java.util.*;
+import com.google.common.util.concurrent.*;
+
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-    List<String> commments = Arrays.asList("Comment 1", "Comment 2", "Comment 3");
+    final String urlRedirect = "https://8080-dot-12380874-dot-devshell.appspot.com/";
+    List<String> comments = new ArrayList<>();
+    RateLimiter rateLimiter = RateLimiter.create(1);
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	response.setContentType("application/json;");
         Gson gson = new Gson();
-        response.getWriter().println(gson.toJson(commments));
+        response.getWriter().println(gson.toJson(comments));
     }
 
+	@Override
+  	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json;");
+        boolean isAcquired = rateLimiter.tryAcquire();
+        if(!isAcquired) {
+            System.out.println("HAHAHA");
+        }
+        comments.add(getPostComment(request));
+    }
+
+    private String getPostComment(HttpServletRequest request) {
+        return request.getParameter("comment");
+    }
 }
