@@ -111,13 +111,15 @@ window.onload = () => {
 fetchComments = function () {
     document.getElementById("raw-comments").innerHTML = '';
     fetch("/data").then(e => e.json()).then((resp) => {
+        console.log(resp)
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
-
+            // Creates the new comment div class to append
             let newComment = document.createElement("div")
             newComment.classList.add("comment")
-            let text = document.createTextNode(comment)
-            newComment.appendChild(text)
+
+            // The actual html, uses the string formatting tool to append it
+            newComment.innerHTML = (`<b>${comment['name']}</b> wrote ${comment['comment']}`)
             commentSection.appendChild(newComment)
         }
     })

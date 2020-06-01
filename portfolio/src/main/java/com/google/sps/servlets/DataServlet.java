@@ -26,8 +26,10 @@ import com.google.common.util.concurrent.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.*;
 import java.util.concurrent.TimeUnit;
+ import com.google.appengine.api.datastore.FetchOptions;
+import java.util.stream.Collectors;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
@@ -51,7 +53,18 @@ public class DataServlet extends HttpServlet {
     	response.setContentType("application/json;");
         Gson gson = new Gson();
         commentGetLimiter.acquire();
-        response.getWriter().println(gson.toJson(comments));
+
+        Query query = new Query("comments");
+        PreparedQuery results = datastore.prepare(query);
+        ArrayList<HashMap<String, String>> output = new  ArrayList<HashMap<String, String>>();
+        for (Entity entity : results.asIterable()) {
+            HashMap<String, String> newEntity = new HashMap<String, String>();
+            newEntity.put("name", (String) entity.getProperty("name"));
+            newEntity.put("comment", (String) entity.getProperty("comment"));
+            output.add(newEntity);
+        }
+
+        response.getWriter().println(gson.toJson(output));
     }
 
 
@@ -67,7 +80,12 @@ public class DataServlet extends HttpServlet {
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
         commentPostLimiter.acquire();
-        comments.add(getPostComment(request));
+
+        Entity taskEntity = new Entity("comments");
+        taskEntity.setProperty("name", getPostName(request));
+        taskEntity.setProperty("comment", getPostComment(request));
+
+        datastore.put(taskEntity);
     }
 
 	/**
@@ -76,5 +94,13 @@ public class DataServlet extends HttpServlet {
     **/
     private String getPostComment(HttpServletRequest request) {
         return request.getParameter("comment");
+    }
+
+	/**
+    *   getPostName() is a helper function used to get the author parameter of the body
+    *   request: the incoming http request to parse it from.
+    **/
+    private String getPostName(HttpServletRequest request) {
+        return request.getParameter("name");
     }
 }
