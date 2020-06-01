@@ -109,9 +109,13 @@ window.onload = () => {
 // fetch comments is used to GET comments from our API
 // appends the results over to the html
 fetchComments = function () {
+    var amount = {
+        amount: document.getElementById( "comment-amount" ).value 
+    }
+
     document.getElementById("raw-comments").innerHTML = '';
-    fetch("/data").then(e => e.json()).then((resp) => {
-        console.log(resp)
+    console.log(endpoint + formatParams(amount))
+    fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append

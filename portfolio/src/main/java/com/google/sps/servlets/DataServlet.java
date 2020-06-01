@@ -57,7 +57,7 @@ public class DataServlet extends HttpServlet {
         Query query = new Query("comments");
         PreparedQuery results = datastore.prepare(query);
         ArrayList<HashMap<String, String>> output = new  ArrayList<HashMap<String, String>>();
-        for (Entity entity : results.asIterable()) {
+        for (Entity entity : results.asList(FetchOptions.Builder.withLimit(Integer.parseInt(request.getParameter("amount"))))) {
             HashMap<String, String> newEntity = new HashMap<String, String>();
             newEntity.put("name", (String) entity.getProperty("name"));
             newEntity.put("comment", (String) entity.getProperty("comment"));

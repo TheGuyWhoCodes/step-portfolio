@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Christopher Ariagno :: STEP Intern</title>
         <link rel="stylesheet" href="style.css">
+  	    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
         <link rel = "stylesheet" href = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     </head>
@@ -239,7 +240,22 @@
                 </form>
             </div>
             <div class = "comment-section" id = "comment-section">
-                <h5>Comments: </h5>
+                <div class = "controls">
+                    <h5>Comments: </h5>
+                    <div class = "form-controls">
+                        <div class="input-group">
+                        <select id="comment-amount" class="form-control">
+                            <option>25</option>
+                            <option>50</option>
+                            <option>100</option>
+                        </select>            
+                        <span class="input-group-btn">
+                            <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1"><i class="fas fa-retweet"></i></button>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id = "raw-comments">
                 
                 </div>

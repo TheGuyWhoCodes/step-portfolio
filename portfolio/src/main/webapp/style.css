@@ -153,6 +153,10 @@ h3 {
     width:80%;
 }
 
+.form-control {
+    width:50%;
+}
+
 .portfolio-card article p {
     color: rgba(255, 255, 255, 0.9);
 }
