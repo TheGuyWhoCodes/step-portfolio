@@ -18,33 +18,38 @@ import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.util.Arrays; 
 import com.google.gson.Gson;
 import java.util.*;
 import com.google.common.util.concurrent.*;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import java.util.concurrent.TimeUnit;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
     final String urlRedirect = "https://8080-dot-12380874-dot-devshell.appspot.com/";
     List<String> comments = new ArrayList<>();
-    RateLimiter rateLimiter = RateLimiter.create(1);
+    final RateLimiter commentGetLimiter = RateLimiter.create(100.0); 
+    final RateLimiter commentPostLimiter = RateLimiter.create(10.0); 
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	response.setContentType("application/json;");
         Gson gson = new Gson();
+        commentGetLimiter.acquire();
         response.getWriter().println(gson.toJson(comments));
     }
 
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
-        boolean isAcquired = rateLimiter.tryAcquire();
-        if(!isAcquired) {
-            System.out.println("HAHAHA");
-        }
+        commentPostLimiter.acquire();
         comments.add(getPostComment(request));
     }
 
