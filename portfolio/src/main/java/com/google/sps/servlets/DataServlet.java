@@ -26,6 +26,17 @@ import com.google.common.util.concurrent.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilter;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.*;
 import java.util.concurrent.TimeUnit;
  import com.google.appengine.api.datastore.FetchOptions;
@@ -34,25 +45,19 @@ import java.util.stream.Collectors;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-    final String urlRedirect = "https://8080-dot-12380874-dot-devshell.appspot.com/";
     List<String> comments = new ArrayList<>();
-    final RateLimiter commentGetLimiter = RateLimiter.create(100.0); 
-    final RateLimiter commentPostLimiter = RateLimiter.create(10.0); 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	/**
     *   this doGet() function will write out the List of comments to JSON
-    *   We also use the commentGetLimiter to limit requests to 100 / sec. If it
-    *   Goes over this values, it'll pause and wait until the rate limit has been
-    *   reset
+    *   format is an array of hash with with strings of info.
     *   request: the incoming user request, (should be empty)
     *   response: the response that we will send, usually the array of comments
     **/
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    	response.setContentType("application/json;");
+        response.setContentType("application/json;");
         Gson gson = new Gson();
-        commentGetLimiter.acquire();
 
         Query query = new Query("comments");
         PreparedQuery results = datastore.prepare(query);
@@ -61,6 +66,7 @@ public class DataServlet extends HttpServlet {
             HashMap<String, String> newEntity = new HashMap<String, String>();
             newEntity.put("name", (String) entity.getProperty("name"));
             newEntity.put("comment", (String) entity.getProperty("comment"));
+            newEntity.put("id", String.valueOf(entity.getKey().getId()));
             output.add(newEntity);
         }
 
@@ -79,7 +85,6 @@ public class DataServlet extends HttpServlet {
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
-        commentPostLimiter.acquire();
 
         Entity taskEntity = new Entity("comments");
         taskEntity.setProperty("name", getPostName(request));
