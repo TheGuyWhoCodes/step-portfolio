@@ -1,6 +1,6 @@
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
+let endpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/data'
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
 let w = container.offsetWidth;
@@ -26,6 +26,8 @@ var animate = function () {
     window.addEventListener('resize',handleWindowResize,false);
 };
 
+// a listener whenever the window gets resized, allows for the three.js
+// window to not distort.
 var handleWindowResize = function () {
     // update height and width of the renderer and the camera
 	WIDTH = container.offsetWidth;
@@ -36,9 +38,106 @@ var handleWindowResize = function () {
 }
 animate();
 
+/**
+ * the validateForm function checks to see if there is a valid name and
+ * and comment response from the user, if so it'll return true
+ * if not, it'll return false
+ */
+function validateForm() {
+	var name = document.forms["comments"]["name"].value;
+	var comment = document.forms["comments"]["comment"].value;
+    if (name == "") {
+        $('#response').text("You need to fill out your name!")
+        $('#myModal').modal()
+        return false;
+    } else if(name.length >= 50) {
+        $('#response').text("You cannot have a name over 50 characters")
+        $('#myModal').modal()
+        return false;
+    } else if(comment == "") {
+        $('#response').text("You cannot have an empty message")
+        $('#myModal').modal()
+        return false
+    }
+    return true;
+}
+
+/**
+ * submitCommentForm uses a POST request to submit form data, instead of the PHP form submit.
+ * Though, this is techincally a weird POST request, because we are using query params and NOT
+ * a proper body request.
+ */
+function submitCommentForm() {
+    if(validateForm()) {
+        // Grabs name + message from user in form
+        let name = document.forms["comments"]["name"].value;
+        let comments = document.forms["comments"]["comment"].value;
+
+        // Assembles into a nice data structure, easier to read
+        let data = {
+            name: name,
+            comment: comments   
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', endpoint + formatParams(data), true);
+        // Need to use this request header in order for servelet to read in values
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+        xhr.send(null);
+        xhr.onload = function() {
+            // Good response
+            if(xhr.status == 200) {
+                $('#myModal').modal()
+    	        fetchComments();
+            } else {
+                $('#response').text("Unable to submit your comment, try again later!")
+                $('#myModal').modal()
+            }
+        }
+    }
+}
+
+// Used to prevent default redirect behavior
+$('#comments').submit(function (evt) {
+   evt.preventDefault();
+});
 
 window.onload = () => {
-    fetch("/data").then(e => e.text()).then((resp) => {
-        document.getElementById("serv-resp").innerText = resp
+	fetchComments();
+}
+
+// fetch comments is used to GET comments from our API
+// appends the results over to the html
+fetchComments = function () {
+    var amount = {
+        amount: document.getElementById( "comment-amount" ).value 
+    }
+
+    document.getElementById("raw-comments").innerHTML = '';
+    fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
+        for(comment of resp) {
+            commentSection = document.getElementById("raw-comments");
+            // Creates the new comment div class to append
+            let newComment = document.createElement("div")
+            newComment.classList.add("comment")
+
+            // The actual html, uses the string formatting tool to append it
+            newComment.innerHTML = (`<b>${comment['name']}</b> wrote ${comment['comment']}`)
+            commentSection.appendChild(newComment)
+        }
     })
+}
+
+/*
+** a helper function used to parse a dictionary to query params
+** ie ?test=test&and=and
+** params: dictionary object to translate to query param
+*/
+function formatParams( params ){
+  return "?" + Object
+    .keys(params)
+    .map(function(key){
+        return key+"="+encodeURIComponent(params[key])
+    })
+    .join("&")
 }
