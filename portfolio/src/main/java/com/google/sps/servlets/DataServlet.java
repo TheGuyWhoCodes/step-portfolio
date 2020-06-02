@@ -46,23 +46,18 @@ import java.util.stream.Collectors;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
     List<String> comments = new ArrayList<>();
-    final RateLimiter commentGetLimiter = RateLimiter.create(100.0); 
-    final RateLimiter commentPostLimiter = RateLimiter.create(10.0); 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	/**
     *   this doGet() function will write out the List of comments to JSON
-    *   We also use the commentGetLimiter to limit requests to 100 / sec. If it
-    *   Goes over this values, it'll pause and wait until the rate limit has been
-    *   reset
+    *   format is an array of hash with with strings of info.
     *   request: the incoming user request, (should be empty)
     *   response: the response that we will send, usually the array of comments
     **/
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    	response.setContentType("application/json;");
+        response.setContentType("application/json;");
         Gson gson = new Gson();
-        commentGetLimiter.acquire();
 
         Query query = new Query("comments");
         PreparedQuery results = datastore.prepare(query);
@@ -90,7 +85,6 @@ public class DataServlet extends HttpServlet {
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
-        commentPostLimiter.acquire();
 
         Entity taskEntity = new Entity("comments");
         taskEntity.setProperty("name", getPostName(request));

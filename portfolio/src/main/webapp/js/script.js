@@ -1,8 +1,8 @@
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-let endpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/data'
-let deleteSingleCommentEndpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/deleteSingleComment'
-let deleteAllCommentsEndpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/deleteAllComments'
+let endpoint = 'https://ariagno-step-2020.uc.r.appspot.com/data'
+let deleteSingleCommentEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteSingleComment'
+let deleteAllCommentsEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteAllComments'
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
 let w = container.offsetWidth;
