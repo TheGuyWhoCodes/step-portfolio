@@ -1,10 +1,14 @@
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 let endpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/data'
+let deleteSingleCommentEndpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/deleteSingleComment'
+let deleteAllCommentsEndpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/deleteAllComments'
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
 let w = container.offsetWidth;
 let h = container.offsetHeight;
+let comments = [];
+
 renderer.setSize(w, h);
 container.appendChild(renderer.domElement);
 
@@ -112,9 +116,10 @@ fetchComments = function () {
     var amount = {
         amount: document.getElementById( "comment-amount" ).value 
     }
-
+	
     document.getElementById("raw-comments").innerHTML = '';
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
+        comments = resp;
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append
@@ -122,10 +127,51 @@ fetchComments = function () {
             newComment.classList.add("comment")
 
             // The actual html, uses the string formatting tool to append it
-            newComment.innerHTML = (`<b>${comment['name']}</b> wrote ${comment['comment']}`)
+            newComment.innerHTML = (`
+            	<button class="btn btn-primary delete" onclick='deleteComment("${comment["id"]}")'><i class="fas fa-trash-alt"></i></button> <b>${comment['name']}</b> wrote ${comment['comment']}
+            `)
             commentSection.appendChild(newComment)
         }
     })
+}
+
+deleteComment = function(id) {
+    var idHash = {
+        id: id
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', deleteSingleCommentEndpoint + formatParams(idHash), true);
+    // Need to use this request header in order for servelet to read in values
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+    xhr.send(null);
+    xhr.onload = function() {
+            if(xhr.status == 200) {
+                $('#response').text("Successfully deleted your comment!!")
+                $('#myModal').modal()
+    	        fetchComments();
+            } else {
+                $('#response').text("Unable to delete your comment, try again later!")
+                $('#myModal').modal()
+            }
+    }
+}
+
+deleteAllComments = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', deleteAllCommentsEndpoint, true);
+    // Need to use this request header in order for servelet to read in values
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+    xhr.send(null);
+    xhr.onload = function() {
+            if(xhr.status == 200) {
+                $('#response').text("Successfully deleted all comments!!")
+                $('#myModal').modal()
+    	        fetchComments();
+            } else {
+                $('#response').text("Unable to delete all comments, try again later!")
+                $('#myModal').modal()
+            }
+    }
 }
 
 /*
