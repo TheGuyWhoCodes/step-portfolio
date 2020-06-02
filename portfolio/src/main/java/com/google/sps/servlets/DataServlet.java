@@ -64,8 +64,8 @@ public class DataServlet extends HttpServlet {
         ArrayList<HashMap<String, String>> output = new  ArrayList<HashMap<String, String>>();
         for (Entity entity : results.asList(FetchOptions.Builder.withLimit(Integer.parseInt(request.getParameter("amount"))))) {
             HashMap<String, String> newEntity = new HashMap<String, String>();
-            newEntity.put("name", (String) entity.getProperty("name"));
-            newEntity.put("comment", (String) entity.getProperty("comment"));
+            newEntity.put("name", htmlInjectionPreventer((String) entity.getProperty("name")));
+            newEntity.put("comment", htmlInjectionPreventer((String) entity.getProperty("comment")));
             newEntity.put("id", String.valueOf(entity.getKey().getId()));
             output.add(newEntity);
         }
@@ -107,5 +107,14 @@ public class DataServlet extends HttpServlet {
     **/
     private String getPostName(HttpServletRequest request) {
         return request.getParameter("name");
+    }
+
+    /**
+    * htmlInjectionPreventer is used to parse out html special characrers
+    * renders out as the same text, without original meaning
+    * str: string to check
+    * return: returns a 
+    private String htmlInjectionPreventer(String str) {
+        return str.replace("<", "&lt;").replace(">", "&gt;");
     }
 }
