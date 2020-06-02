@@ -3,6 +3,7 @@ let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHe
 let endpoint = 'https://ariagno-step-2020.uc.r.appspot.com/data'
 let deleteSingleCommentEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteSingleComment'
 let deleteAllCommentsEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteAllComments'
+
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
 let w = container.offsetWidth;
@@ -115,11 +116,11 @@ window.onload = () => {
 fetchComments = function () {
     var amount = {
         amount: document.getElementById( "comment-amount" ).value 
-    }
-	
+    }	
     document.getElementById("raw-comments").innerHTML = '';
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments = resp;
+
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append
