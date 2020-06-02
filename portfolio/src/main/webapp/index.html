@@ -243,6 +243,7 @@
                 <div class = "controls">
                     <h5>Comments: </h5>
                     <div class = "form-controls">
+                        <small>Comment Amount: </small>
                         <div class="input-group">
                         <select id="comment-amount" class="form-control">
                             <option>25</option>
@@ -250,7 +251,7 @@
                             <option>100</option>
                         </select>            
                         <span class="input-group-btn">
-                            <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1"><i class="fas fa-retweet"></i></button>
+                            <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Refresh Comments!"><i class="fas fa-retweet"></i></button>
                         </span>
                         </div>
                     </div>

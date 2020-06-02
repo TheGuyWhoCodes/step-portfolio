@@ -1,6 +1,6 @@
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-let endpoint = 'https://8080-dot-12380874-dot-devshell.appspot.com/data'
+let endpoint = 'https://8080-4edd01f7-fc25-4397-949c-1397c9553bc5.us-central1.cloudshell.dev/data'
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
 let w = container.offsetWidth;
@@ -114,7 +114,6 @@ fetchComments = function () {
     }
 
     document.getElementById("raw-comments").innerHTML = '';
-    console.log(endpoint + formatParams(amount))
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
