@@ -53,13 +53,15 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.*;
 import java.util.concurrent.TimeUnit;
- import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.cloud.language.v1.Document;
+import com.google.cloud.language.v1.LanguageServiceClient;
+import com.google.cloud.language.v1.Sentiment;
 import java.util.stream.Collectors;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-    List<String> comments = new ArrayList<>();
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	/**
@@ -80,6 +82,7 @@ public class DataServlet extends HttpServlet {
             HashMap<String, String> newEntity = new HashMap<String, String>();
             newEntity.put("name", htmlInjectionPreventer((String) entity.getProperty("name")));
             newEntity.put("comment", htmlInjectionPreventer((String) entity.getProperty("comment")));
+            newEntity.put("score", (String) entity.getProperty("score"));
             newEntity.put("id", String.valueOf(entity.getKey().getId()));
             newEntity.put("image", (String) entity.getProperty("image"));
             output.add(newEntity);
@@ -100,11 +103,21 @@ public class DataServlet extends HttpServlet {
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
+        
+        Document doc = Document.newBuilder()
+                .setContent(getPostComment(request))
+                .setType(Document.Type.PLAIN_TEXT)
+                .build();
+        LanguageServiceClient languageService = LanguageServiceClient.create();
+        Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
+        float score = sentiment.getScore();
+        languageService.close();
 
         Entity taskEntity = new Entity("comments");
         taskEntity.setProperty("name", getPostName(request));
         taskEntity.setProperty("comment", getPostComment(request));
         taskEntity.setProperty("image", getUploadedFileUrl(request, "image"));
+        taskEntity.setProperty("score", String.valueOf(score));
         datastore.put(taskEntity);
     }
 

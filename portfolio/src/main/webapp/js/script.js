@@ -90,7 +90,6 @@ function submitCommentForm() {
         formData.append("name", name)
         formData.append("comment", comments);
         var xhr = new XMLHttpRequest();
-
         fetch('/blobstore-upload-url').then((response) => {
             return response.text();
         }).then((imageUploadUrl) => {
@@ -100,6 +99,7 @@ function submitCommentForm() {
             xhr.onload = function() {
                 // Good response
                 if(xhr.status == 200) {
+                    $('#response').text("Successfully posted your comment!")
                     $('#myModal').modal()
                     fetchComments();
                 } else {
@@ -138,13 +138,26 @@ fetchComments = function () {
 
             // The actual html, uses the string formatting tool to append it
             newComment.innerHTML = (`
-            	<button class="btn btn-primary delete" onclick='deleteComment("${comment["id"]}")'><i class="fas fa-trash-alt"></i></button> <b>${comment['name']}</b> wrote ${comment['comment']}
+            	<button class="btn btn-primary delete" onclick='deleteComment("${comment["id"]}")'>
+                    <i class="fas fa-trash-alt"></i>
+                </button> 
+                <b>${comment['name']}</b> wrote ${comment['comment']}
+                <br><small>This commenter is feeling: ${returnFeelingEmoji(comment["score"])}</small>
             `)
             commentSection.appendChild(newComment)
         }
     })
 }
 
+returnFeelingEmoji = function(score) {
+    if(score > .2) {
+        return `😃 ${score}`
+    } else if(score < -.2) {
+        return `😡 ${score}`
+    } else {
+        return `😐 ${score}`
+    }
+}
 
 deleteComment = function(id) {
     var idHash = {
@@ -156,14 +169,14 @@ deleteComment = function(id) {
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
     xhr.send(null);
     xhr.onload = function() {
-            if(xhr.status == 200) {
-                $('#response').text("Successfully deleted your comment!!")
-                $('#myModal').modal()
-    	        fetchComments();
-            } else {
-                $('#response').text("Unable to delete your comment, try again later!")
-                $('#myModal').modal()
-            }
+        if(xhr.status == 200) {
+            $('#response').text("Successfully deleted your comment!!")
+            $('#myModal').modal()
+            fetchComments();
+        } else {
+            $('#response').text("Unable to delete your comment, try again later!")
+            $('#myModal').modal()
+        }
     }
 }
 
