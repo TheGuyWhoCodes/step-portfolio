@@ -109,12 +109,15 @@ public class DataServlet extends HttpServlet {
         return request.getParameter("name");
     }
 
+
     /**
     * htmlInjectionPreventer is used to parse out html special characrers
     * renders out as the same text, without original meaning
     * str: string to check
-    * return: returns a 
+    * return: returns a defang'd string
+    **/
     private String htmlInjectionPreventer(String str) {
         return str.replace("<", "&lt;").replace(">", "&gt;");
     }
+
 }

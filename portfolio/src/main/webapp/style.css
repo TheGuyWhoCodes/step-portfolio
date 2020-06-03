@@ -234,6 +234,10 @@ p.small {
     margin: auto;
 }
 
+.delete {
+    vertical-align: initial !important;
+}
+
 @media (min-width: 768px) {
     .h-md-100 { 
         height: 100vh; 
