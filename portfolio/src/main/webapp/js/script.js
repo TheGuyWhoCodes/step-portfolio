@@ -84,21 +84,30 @@ function submitCommentForm() {
             comment: comments   
         };
 
+        let photo = document.getElementById("image-file").files[0];  // file from input
+        let formData = new FormData();
+        formData.append("photo", photo);                                
+        formData.append("name", name)
+        formData.append("comment", comments);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', endpoint + formatParams(data), true);
-        // Need to use this request header in order for servelet to read in values
-        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
-        xhr.send(null);
-        xhr.onload = function() {
-            // Good response
-            if(xhr.status == 200) {
-                $('#myModal').modal()
-    	        fetchComments();
-            } else {
-                $('#response').text("Unable to submit your comment, try again later!")
-                $('#myModal').modal()
+
+        fetch('/blobstore-upload-url').then((response) => {
+            return response.text();
+        }).then((imageUploadUrl) => {
+            console.log(imageUploadUrl)
+            xhr.open('POST', imageUploadUrl, true);
+            xhr.send(formData);
+            xhr.onload = function() {
+                // Good response
+                if(xhr.status == 200) {
+                    $('#myModal').modal()
+                    fetchComments();
+                } else {
+                    $('#response').text("Unable to submit your comment, try again later!")
+                    $('#myModal').modal()
+                }
             }
-        }
+        });
     }
 }
 
@@ -135,6 +144,7 @@ fetchComments = function () {
         }
     })
 }
+
 
 deleteComment = function(id) {
     var idHash = {

@@ -228,6 +228,9 @@ p.small {
     height:15px;
 }
 
+.file-browser {
+    margin:1em;
+}
 .hero {
     text-align: center;
     display:block;
