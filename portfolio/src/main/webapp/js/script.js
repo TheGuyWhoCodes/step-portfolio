@@ -74,19 +74,10 @@ function validateForm() {
  */
 function submitCommentForm() {
     if(validateForm()) {
-        // Grabs name + message from user in form
-        let name = document.forms["comments"]["name"].value;
-        let comments = document.forms["comments"]["comment"].value;
-
-        // Assembles into a nice data structure, easier to read
-        let data = {
-            name: name,
-            comment: comments   
-        };
-
         let photo = document.getElementById("image-file").files[0];  // file from input
+        console.log(photo);
         let formData = new FormData();
-        formData.append("photo", photo);                                
+        formData.append("image", photo);                                
         formData.append("name", name)
         formData.append("comment", comments);
         var xhr = new XMLHttpRequest();
