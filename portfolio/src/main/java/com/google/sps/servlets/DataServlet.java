@@ -103,7 +103,7 @@ public class DataServlet extends HttpServlet {
 	@Override
   	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;");
-        
+                Gson gson = new Gson();
         Document doc = Document.newBuilder()
                 .setContent(getPostComment(request))
                 .setType(Document.Type.PLAIN_TEXT)
@@ -112,6 +112,7 @@ public class DataServlet extends HttpServlet {
         Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
         float score = sentiment.getScore();
         languageService.close();
+        response.getWriter().println(gson.toJson( request.getParameter("image")));        
 
         Entity taskEntity = new Entity("comments");
         taskEntity.setProperty("name", getPostName(request));
@@ -119,6 +120,7 @@ public class DataServlet extends HttpServlet {
         taskEntity.setProperty("image", getUploadedFileUrl(request, "image"));
         taskEntity.setProperty("score", String.valueOf(score));
         datastore.put(taskEntity);
+
     }
 
 	/**
@@ -152,7 +154,7 @@ public class DataServlet extends HttpServlet {
   private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName) {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    List<BlobKey> blobKeys = blobs.get("image");
+    List<BlobKey> blobKeys = blobs.get(formInputElementName);
 
     // User submitted form without selecting a file, so we can't get a URL. (dev server)
     if (blobKeys == null || blobKeys.isEmpty()) {

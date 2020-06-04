@@ -1,8 +1,8 @@
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-let endpoint = 'https://ariagno-step-2020.uc.r.appspot.com/data'
-let deleteSingleCommentEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteSingleComment'
-let deleteAllCommentsEndpoint = 'https://ariagno-step-2020.uc.r.appspot.com/deleteAllComments'
+let endpoint = '/data'
+let deleteSingleCommentEndpoint = '/deleteSingleComment'
+let deleteAllCommentsEndpoint = '/deleteAllComments'
 
 let renderer = new THREE.WebGLRenderer();
 let container = document.getElementById('world');
@@ -78,8 +78,13 @@ function submitCommentForm() {
         console.log(photo);
         let formData = new FormData();
         formData.append("image", photo);                                
-        formData.append("name", name)
-        formData.append("comment", comments);
+        formData.append("name", document.forms["comments"]["name"].value)
+        formData.append("comment", document.forms["comments"]["comment"].value);
+
+        for (var pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
         var xhr = new XMLHttpRequest();
         fetch('/blobstore-upload-url').then((response) => {
             return response.text();
@@ -120,7 +125,7 @@ fetchComments = function () {
     document.getElementById("raw-comments").innerHTML = '';
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments = resp;
-
+        console.log(resp)
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append
