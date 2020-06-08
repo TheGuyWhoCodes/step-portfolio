@@ -39,7 +39,7 @@ public final class MeetingRequest {
    * Returns a read-only copy of the people who are required to attend this meeting.
    */
   public Collection<String> getAttendees() {
-    return Collections.unmodifiableCollection(attendees);
+    return attendees;
   }
 
   /**
