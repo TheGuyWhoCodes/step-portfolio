@@ -138,30 +138,61 @@ public final class FindMeetingQuery {
     }
 
     /**
-    *   doEventsOverlap is a helper function to check 
-    *
-    *
+    *   doEventsOverlap is a helper function to check if an event overlaps
+    *   a: TimeRange 1 to compare to
+    *   b: TimeRange 2 to compare to
+    *   return: true if they do overlap, false if they don't
     */
     private boolean doEventsOverlap(TimeRange a, TimeRange b) {
         return TimeRange.overlaps(a,b);
     }
 
+    /**
+    *   checkIfEventGoesToEnd, checks to see if the event goes to the end of the day
+    *   a: TimeRange to check if it goes to the end
+    *   return: A boolean if the event goes to the end of the day
+    */
     private boolean checkIfEventGoesToEnd(TimeRange a) {
         return a.end() == (TimeRange.END_OF_DAY + 1);
     }
 
+    /**
+    *   isEnoughTime is a helper function to see if the time request is enough to fit in the slow
+    *   a: TimeRange to check
+    *   request: the amount of time that someone wants to meet
+    */
     private boolean isEnoughTime(TimeRange a, MeetingRequest request) {
         return a.duration() >= request.getDuration();
     }
 
+    /**
+    *   doesContain, is a helper function to check if an event is within another
+    *   a: TimeRange 1 to compare to
+    *   b: TimeRange 2 to compare to
+    *   return: a boolean if they do contain each other
+    */
     private boolean doesContain(TimeRange a, TimeRange b) {
         return a.contains(b) || b.contains(a);
     }
 
+    /**
+    *   getGreatestEndinContains grabs the outer time if they contain each other, ie:
+    *   if we compare 510 and 600, it'll return 600
+    *   a: TimeRange 1 to compare to
+    *   b: TimeRange 2 to compare to
+    *   return: a number containing the greatest end point
+    */
     private int getGreatestEndinContains(TimeRange a, TimeRange b) {
         return a.end() > b.end() ? a.end() : b.end();
     }
 
+    /**
+    *   lowestEndInContains grabs the lower start time if they contain each other, ie:
+    *   if we compare 510 and 600, it'll return 510
+    *   a: TimeRange 1 to compare to
+    *   b: TimeRange 2 to compare to
+    *   return: a number containing the lowest start point
+    */
     private int lowestEndInContains(TimeRange a, TimeRange b) {
         return a.end() < b.end() ? a.end() : b.end();
     }
