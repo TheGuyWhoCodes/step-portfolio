@@ -64,7 +64,7 @@ public final class FindMeetingQuery {
         // Checks to see if the first event is right at time 0, if so it won't do anything and wait for the loop
         // to start, if not, it'll generate a timeslot going to the first sorted event.
         // also makes sure that the attendees are valid.
-        if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt)) {
+        if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt, request)) {
             tempRange = TimeRange.fromStartEnd(0, sortedEvent.get(0).getStart(), false);
             finalTimeRange.add(tempRange);
             tempRange = null;
@@ -72,7 +72,7 @@ public final class FindMeetingQuery {
 
         for(int i = 0; i < sortedEvent.size(); i++) {
             // checks to see if attendees are within both the request and event
-            if(isAttendeeInBoth(sortedEvent.get(i).getAttendees(), requestAtt)) {
+            if(isAttendeeInBoth(sortedEvent.get(i).getAttendees(), requestAtt, request)) {
                 // if the range isn't build already, start it, will be extended later
                 if(null == tempRange) {
                     tempRange = TimeRange.fromStartEnd(sortedEvent.get(i).getStart(), sortedEvent.get(i).getEnd(),false);
@@ -146,7 +146,10 @@ public final class FindMeetingQuery {
                 }
             }
         }
-
+        if(finalTimeRange.size() == 0 && request.getOptionalAttendees().size() != 0) {
+            request.removeOptionalAttendees();
+            return query(events, request);
+        }
         return finalTimeRange;
     }
 
@@ -157,9 +160,16 @@ public final class FindMeetingQuery {
     *   Collection<String> b: second Collection to check through
     *   return: true if there are common attendees, false if there is none.
     */
-    private boolean isAttendeeInBoth(Collection<String> a, Collection<String> b) {
+    private boolean isAttendeeInBoth(Collection<String> a, Collection<String> b, MeetingRequest request) {
         List<String> arr = new ArrayList<String>(a);
         arr.retainAll(b);
+        return !arr.isEmpty() || isOptional(a, request);
+    }
+
+    private boolean isOptional(Collection <String> a, MeetingRequest request) {
+        List<String> arr = new ArrayList<String>(a);
+        arr.retainAll(request.getOptionalAttendees());
+
         return !arr.isEmpty();
     }
 

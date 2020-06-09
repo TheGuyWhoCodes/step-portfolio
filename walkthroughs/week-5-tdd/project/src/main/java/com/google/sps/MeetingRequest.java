@@ -25,7 +25,7 @@ public final class MeetingRequest {
   private final Collection<String> attendees = new HashSet<>();
 
   // Some optional attendees for this new meeting. Use a set to avoid duplicates.
-  private final Collection<String> optional_attendees = new HashSet<>();
+  private  Collection<String> optional_attendees = new HashSet<>();
 
   // The duration of the meeting in minutes.
   private final long duration;
@@ -56,6 +56,10 @@ public final class MeetingRequest {
     if (!attendees.contains(attendee)) {
       optional_attendees.add(attendee);
     }
+  }
+
+  public void removeOptionalAttendees() {
+      optional_attendees = Arrays.asList();
   }
 
   /**
