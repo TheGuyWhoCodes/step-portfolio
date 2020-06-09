@@ -64,6 +64,12 @@ public final class FindMeetingQuery {
         // Checks to see if the first event is right at time 0, if so it won't do anything and wait for the loop
         // to start, if not, it'll generate a timeslot going to the first sorted event.
         // also makes sure that the attendees are valid.
+        ArrayList<Event> mandatoryOnly = new ArrayList<Event>(sortedEvent);
+        for(Event event : sortedEvent) {
+            if(isOptionalUserEvent(event, request)) {
+                mandatoryOnly.remove(event);
+            }
+        }
         if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt, request)) {
             tempRange = TimeRange.fromStartEnd(0, sortedEvent.get(0).getStart(), false);
             finalTimeRange.add(tempRange);
@@ -166,11 +172,11 @@ public final class FindMeetingQuery {
         return !arr.isEmpty() || isOptional(a, request);
     }
 
-    private boolean isOptional(Collection <String> a, MeetingRequest request) {
-        List<String> arr = new ArrayList<String>(a);
-        arr.retainAll(request.getOptionalAttendees());
+    private boolean isOptional(Collection <String> attendees, MeetingRequest request) {
+        List<String> mandatoryAttendees = new ArrayList<String>(attendees);
+        mandatoryAttendees.retainAll(request.getAttendees());
 
-        return !arr.isEmpty();
+        return mandatoryAttendees.size() == 0;
     }
 
     /**
