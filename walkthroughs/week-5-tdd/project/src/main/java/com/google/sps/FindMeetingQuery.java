@@ -23,10 +23,27 @@ import java.util.*;
 import com.google.common.collect.Lists;
 import com.google.sps.TimeRange;
 public final class FindMeetingQuery {
+
+    private int requestTime;
+    /**
+    *   query() function allows for users to submit a request and a list of events and finds
+    *   a list of timeslots that work for the users. This can be used for 2+ users
+    *   The steps are:
+    *       1. Sort the events, events may not be in order
+    *       2. Creates an inverted time list, meaning we merge any edge cases into a single timeline
+    *           intead of doing conditional statements every check in the loop, makes for easier to read code
+    *           and less expensive on certain edge cases
+    *       3. Convert into final time List
+    *       o(n+n)
+    *   events: Collection<Event> arraylist of events to check through
+    *   request: MeetingRequest, the request that holds attendees and duration
+    **/
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
         // Converts to arraylist for sorting in the future
         List<Event> sortedEvent = new ArrayList<Event>(events);
 
+        // Saves request time for later
+        requestTime = (int) request.getDuration();
         // Uses sort override to sort by ascending order
         Collections.sort(sortedEvent, Event.ORDER_BY_START);
 
@@ -37,7 +54,10 @@ public final class FindMeetingQuery {
             return Arrays.asList(TimeRange.WHOLE_DAY);
         }
 
+        // ArrayLists to support inverted and final time slots
         ArrayList<TimeRange> finalTimeRange = new ArrayList<TimeRange>();
+        ArrayList<TimeRange> invertedTimeRange =  new ArrayList<TimeRange>();
+        // Attendees from the request 
         Collection<String> requestAtt = request.getAttendees();
         TimeRange tempRange = null;
 
@@ -51,56 +71,82 @@ public final class FindMeetingQuery {
         }
 
         for(int i = 0; i < sortedEvent.size(); i++) {
-            // Checks to see if there is an overlap in attendees
+            // checks to see if attendees are within both the request and event
             if(isAttendeeInBoth(sortedEvent.get(i).getAttendees(), requestAtt)) {
-                // if we don't have a current tempRange we are working with, create a new one
-                if(null == tempRange){
+                // if the range isn't build already, start it, will be extended later
+                if(null == tempRange) {
                     tempRange = TimeRange.fromStartEnd(sortedEvent.get(i).getStart(), sortedEvent.get(i).getEnd(),false);
                 } else {
+                    // checks to see if the events overlap or contain each other
                     if(doEventsOverlap(tempRange, sortedEvent.get(i).getWhen())) {
-                        // Do the events overlap? If so we need to extend the timerange to the end of the new event
                         if(doesContain(tempRange, sortedEvent.get(i).getWhen())) {
                             tempRange.setEnd(lowestEndInContains(tempRange, sortedEvent.get(i).getWhen()), getGreatestEndinContains(tempRange, sortedEvent.get(i).getWhen()) );
                         } else {
-                            tempRange.setEnd(tempRange.start(), sortedEvent.get(i).getEnd());
+                            tempRange = TimeRange.fromStartEnd(tempRange.start(), sortedEvent.get(i).getEnd(),false);
                         }
-                    } else if(isEventBacktoBack(tempRange, sortedEvent.get(i).getWhen())) {
-                        // Are the events back to back? If so we need to extend the end time
-                        tempRange.setEnd(tempRange.start(), sortedEvent.get(i).getEnd());
+                    // checks to see if events touch each other
+                    } else if(tempRange.end() == sortedEvent.get(i).getStart()) {
+                        tempRange = TimeRange.fromStartEnd(tempRange.start(), sortedEvent.get(i).getEnd(),false);
                     } else {
-                        // Since there is no overlap, we can calculate the final timeslot
-                        if(i == sortedEvent.size() - 1) {
-                            if(sortedEvent.get(i).getEnd() == (TimeRange.END_OF_DAY + 1)) {
-                                tempRange.setEnd(tempRange.end(), sortedEvent.get(i).getStart());   
-                            } else {
-                                tempRange.setEnd(tempRange.end(), sortedEvent.get(i).getStart());   
-                                finalTimeRange.add(TimeRange.fromStartEnd(sortedEvent.get(i).getEnd(), TimeRange.END_OF_DAY + 1, false));
-                            }                         
-                        } else {
-                            tempRange.setEnd(tempRange.end(), sortedEvent.get(i + 1).getStart());                      
+                        // No more edge cases, we can add the inverted time to the timeslot
+                        if(null != tempRange) {
+                            invertedTimeRange.add(tempRange);
                         }
-                        if(!checkIfEventGoesToEnd(tempRange) && !doEventsOverlap(tempRange, sortedEvent.get(i).getWhen()) && isEnoughTime(tempRange, request)) { 
-                            finalTimeRange.add(tempRange);
-                        }
-                        tempRange = null;  
+                        tempRange = TimeRange.fromStartEnd(sortedEvent.get(i).getStart(), sortedEvent.get(i).getEnd(),false);                        
                     }
                 }
+            }
+        }
+        // In case we don't find an extra case to extend or overlap with, we can simply add in the range,
+        // this would happen on the last cycle.
+        if(null != tempRange) {
+            invertedTimeRange.add(tempRange);
+        }
+        // If we didn't find any inverted time slots, we should return the full day time range
+        if(invertedTimeRange.size() == 0) {
+            return Arrays.asList(TimeRange.WHOLE_DAY);
+        }
+
+        // The loop allows for the times to be inverted into the actual time slots for users to schedule in
+        for(int i = 0; i < invertedTimeRange.size(); i++) {
+            TimeRange time = invertedTimeRange.get(i);
+
+            // used for this type of time slot
+            // Events  : |--A--|     
+            // Day     : |---------------------|
+            // Options :       |---------------|
+            if(time.start() == 0) {
+                if(invertedTimeRange.size() == 1) {
+                    addToArrayList(finalTimeRange, TimeRange.fromStartEnd(time.end(), TimeRange.END_OF_DAY + 1, false));
+                } else {
+                    addToArrayList(finalTimeRange, TimeRange.fromStartEnd(time.end(), invertedTimeRange.get(i+1).start(), false));
+                }
+
+            // used for this type of time slot
+            // Events  :                 |--A--|     
+            // Day     : |---------------------|
+            // Options : |---------------|
+            } else if(time.end() == TimeRange.END_OF_DAY + 1) {
+                if(invertedTimeRange.size() == 1) {
+                    addToArrayList(finalTimeRange, TimeRange.fromStartEnd(0, time.start(), false));
+                } else {
+                    TimeRange range = TimeRange.fromStartEnd(invertedTimeRange.get(i-1).end() , time.start(), false);
+                    if(!finalTimeRange.contains(range))
+                        addToArrayList(finalTimeRange, range);
+                }
+            // used for this type of time slot
+            // Events  :       |--A--|     
+            // Day     : |---------------------|
+            // Options : |-----|     |---------|
             } else {
-                if(i == sortedEvent.size() - 1 && finalTimeRange.size() == 0) {
-                    finalTimeRange.add(TimeRange.WHOLE_DAY);
-                } 
+                if(i == invertedTimeRange.size() - 1) {
+                    addToArrayList(finalTimeRange, TimeRange.fromStartEnd(time.end() , TimeRange.END_OF_DAY + 1, false));
+                } else {
+                    addToArrayList(finalTimeRange, TimeRange.fromStartEnd(time.end() , invertedTimeRange.get(i+1).start(), false));
+                }
             }
         }
 
-        // If we never added in the last range into our list, this means we never got a closure.
-        // meaning the time could last till the end of the day
-        if(null != tempRange) {
-            tempRange.setEnd(tempRange.end(), TimeRange.END_OF_DAY + 1);   
-            finalTimeRange.add(tempRange);
-        }
-
-        // Need this extra sort, the tests require events to come back in order
-        Collections.sort(finalTimeRange, TimeRange.ORDER_BY_START);        
         return finalTimeRange;
     }
 
@@ -194,6 +240,17 @@ public final class FindMeetingQuery {
     *   return: a number containing the lowest start point
     */
     private int lowestEndInContains(TimeRange a, TimeRange b) {
-        return a.end() < b.end() ? a.end() : b.end();
+        return a.start() < b.start() ? a.start() : b.start();
+    }
+
+    /**
+    *   addToArrayList is a helper function that checks for time duration before adding
+    *   a: TimeRange, is the TimeRange we want to add
+    *   timeRangeList: the TimeRange List to add the TimeRange to
+    */
+    private void addToArrayList(ArrayList<TimeRange> timeRangeList, TimeRange a) {
+        if(a.duration() >= requestTime) {
+            timeRangeList.add(a);
+        }
     }
 }

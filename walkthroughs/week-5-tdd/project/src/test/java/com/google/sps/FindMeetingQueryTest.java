@@ -149,13 +149,13 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void nestedEvents() {
-    // Have an event for each person, but have one person's event fully contain another's event. We
-    // should see two options.
-    //
-    // Events  :       |----A----|
-    //                   |--B--|
-    // Day     : |---------------------|
-    // Options : |--1--|         |--2--|
+//     // Have an event for each person, but have one person's event fully contain another's event. We
+//     // should see two options.
+//     //
+//     // Events  :       |----A----|
+//     //                   |--B--|
+//     // Day     : |---------------------|
+//     // Options : |--1--|         |--2--|
 
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartDuration(TIME_0830AM, DURATION_90_MINUTES),
