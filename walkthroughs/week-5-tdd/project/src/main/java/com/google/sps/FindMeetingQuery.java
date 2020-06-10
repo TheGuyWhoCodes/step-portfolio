@@ -25,6 +25,8 @@ import com.google.sps.TimeRange;
 public final class FindMeetingQuery {
 
     private int requestTime;
+    private boolean tryTwo;
+
     /**
     *   query() function allows for users to submit a request and a list of events and finds
     *   a list of timeslots that work for the users. This can be used for 2+ users
@@ -43,33 +45,39 @@ public final class FindMeetingQuery {
         List<Event> sortedEvent = new ArrayList<Event>(events);
 
         // Saves request time for later
+        Collection<String> requestAtt = request.getAttendees();
         requestTime = (int) request.getDuration();
         // Uses sort override to sort by ascending order
         Collections.sort(sortedEvent, Event.ORDER_BY_START);
-
         // checks for valid duration and empty event edge cases
         if(!isValidDuration((int) request.getDuration())) {
             return Arrays.asList();        
         } else if(events.isEmpty()) {
             return Arrays.asList(TimeRange.WHOLE_DAY);
         }
-
+        ArrayList<String> requestAttTester = new ArrayList<String>();
+        ArrayList<String> totalAttendance = new ArrayList<String>();
+        totalAttendance.addAll(request.getAttendees());
+        totalAttendance.addAll(request.getOptionalAttendees());
+        for(Event event : sortedEvent) {
+            requestAttTester.addAll(event.getAttendees());
+        }
+        requestAttTester.retainAll(totalAttendance);
+        if(requestAttTester.size() == 0) {
+            if(tryTwo) {
+                return Arrays.asList();
+            }
+            return Arrays.asList(TimeRange.WHOLE_DAY);
+        }
         // ArrayLists to support inverted and final time slots
         ArrayList<TimeRange> finalTimeRange = new ArrayList<TimeRange>();
         ArrayList<TimeRange> invertedTimeRange =  new ArrayList<TimeRange>();
-        // Attendees from the request 
-        Collection<String> requestAtt = request.getAttendees();
+        
         TimeRange tempRange = null;
 
         // Checks to see if the first event is right at time 0, if so it won't do anything and wait for the loop
         // to start, if not, it'll generate a timeslot going to the first sorted event.
         // also makes sure that the attendees are valid.
-        ArrayList<Event> mandatoryOnly = new ArrayList<Event>(sortedEvent);
-        for(Event event : sortedEvent) {
-            if(isOptionalUserEvent(event, request)) {
-                mandatoryOnly.remove(event);
-            }
-        }
         if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt, request)) {
             tempRange = TimeRange.fromStartEnd(0, sortedEvent.get(0).getStart(), false);
             finalTimeRange.add(tempRange);
@@ -107,10 +115,6 @@ public final class FindMeetingQuery {
         // this would happen on the last cycle.
         if(null != tempRange) {
             invertedTimeRange.add(tempRange);
-        }
-        // If we didn't find any inverted time slots, we should return the full day time range
-        if(invertedTimeRange.size() == 0) {
-            return Arrays.asList(TimeRange.WHOLE_DAY);
         }
 
         // The loop allows for the times to be inverted into the actual time slots for users to schedule in
@@ -154,6 +158,7 @@ public final class FindMeetingQuery {
         }
         if(finalTimeRange.size() == 0 && request.getOptionalAttendees().size() != 0) {
             request.removeOptionalAttendees();
+            tryTwo = true;
             return query(events, request);
         }
         return finalTimeRange;
@@ -172,11 +177,17 @@ public final class FindMeetingQuery {
         return !arr.isEmpty() || isOptional(a, request);
     }
 
-    private boolean isOptional(Collection <String> attendees, MeetingRequest request) {
-        List<String> mandatoryAttendees = new ArrayList<String>(attendees);
-        mandatoryAttendees.retainAll(request.getAttendees());
+    private boolean isMandatory(Collection<String> a, Collection<String> b) {
+        List<String> arr = new ArrayList<String>(a);
+        arr.retainAll(b);
+        return !arr.isEmpty();
+    }
 
-        return mandatoryAttendees.size() == 0;
+    private boolean isOptional(Collection <String> a, MeetingRequest request) {
+        List<String> arr = new ArrayList<String>(a);
+        arr.retainAll(request.getOptionalAttendees());
+
+        return !arr.isEmpty();
     }
 
     /**
