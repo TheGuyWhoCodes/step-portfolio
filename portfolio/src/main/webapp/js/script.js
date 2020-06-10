@@ -74,22 +74,18 @@ function validateForm() {
  */
 function submitCommentForm() {
     if(validateForm()) {
+
         let photo = document.getElementById("image-file").files[0];  // file from input
-        console.log(photo);
         let formData = new FormData();
         formData.append("image", photo);                                
         formData.append("name", document.forms["comments"]["name"].value)
         formData.append("comment", document.forms["comments"]["comment"].value);
 
-        for (var pair of formData.entries()) {
-            console.log(pair[0]+ ', ' + pair[1]); 
-        }
-
+        disableButton();
         var xhr = new XMLHttpRequest();
         fetch('/blobstore-upload-url').then((response) => {
             return response.text();
         }).then((imageUploadUrl) => {
-            console.log(imageUploadUrl)
             xhr.open('POST', imageUploadUrl, true);
             xhr.send(formData);
             xhr.onload = function() {
@@ -97,14 +93,26 @@ function submitCommentForm() {
                 if(xhr.status == 200) {
                     $('#response').text("Successfully posted your comment!")
                     $('#myModal').modal()
+                    enableButton();
                     fetchComments();
                 } else {
                     $('#response').text("Unable to submit your comment, try again later!")
                     $('#myModal').modal()
+                    enableButton();
                 }
             }
         });
     }
+}
+
+enableButton = function() {
+    $("#btn-submit").prop("disabled", false);
+    $("#btn-submit").html(`Submit`);
+}
+
+disableButton = function() {
+    $("#btn-submit").prop("disabled", true);
+    $("#btn-submit").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting Comment...`);
 }
 
 // Used to prevent default redirect behavior
@@ -125,7 +133,6 @@ fetchComments = function () {
     document.getElementById("raw-comments").innerHTML = '';
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments = resp;
-        console.log(resp)
         for(comment of resp) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append

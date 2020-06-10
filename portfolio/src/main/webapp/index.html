@@ -241,7 +241,8 @@
                         <input type="file" class="custom-file-input" id="image-file">
                         <label class="custom-file-label" for="customFile">Upload a Photo...</label>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    
+                    <button id = "btn-submit" type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
             <div class = "comment-section" id = "comment-section">
@@ -252,9 +253,9 @@
                         <small>Comment Amount: </small>
                         <div class="input-group">
                         <select id="comment-amount" class="form-control">
-                            <option>25</option>
-                            <option>50</option>
-                            <option>100</option>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>15</option>
                         </select>            
                         <span class="input-group-btn">
                             <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Refresh Comments!"><i class="fas fa-retweet"></i></button>
