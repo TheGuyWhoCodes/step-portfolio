@@ -50,7 +50,7 @@ public final class FindMeetingQuery {
         // Uses sort override to sort by ascending order
         Collections.sort(sortedEvent, Event.ORDER_BY_START);
         // checks for valid duration and empty event edge cases
-        if(!isValidDuration((int) request.getDuration())) {
+        if(!isValidDuration(requestTime)) {
             return Arrays.asList();        
         } else if(events.isEmpty()) {
             return Arrays.asList(TimeRange.WHOLE_DAY);
@@ -58,7 +58,9 @@ public final class FindMeetingQuery {
         ArrayList<String> requestAttTester = new ArrayList<String>();
         ArrayList<String> totalAttendance = new ArrayList<String>();
         totalAttendance.addAll(request.getAttendees());
-        totalAttendance.addAll(request.getOptionalAttendees());
+        if(null != request.getOptionalAttendees()) {
+            totalAttendance.addAll(request.getOptionalAttendees());
+        }
         for(Event event : sortedEvent) {
             requestAttTester.addAll(event.getAttendees());
         }
@@ -78,10 +80,22 @@ public final class FindMeetingQuery {
         // Checks to see if the first event is right at time 0, if so it won't do anything and wait for the loop
         // to start, if not, it'll generate a timeslot going to the first sorted event.
         // also makes sure that the attendees are valid.
-        if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt, request)) {
-            tempRange = TimeRange.fromStartEnd(0, sortedEvent.get(0).getStart(), false);
-            finalTimeRange.add(tempRange);
-            tempRange = null;
+        ArrayList<Event> temp = new ArrayList<Event>();
+        for(Event event : sortedEvent) {
+            if(event.getWhen().duration() == (TimeRange.WHOLE_DAY.duration() - 1)) {
+                 temp.add(event);
+                continue;
+            } else {
+                break;
+            }
+        }
+        sortedEvent.removeAll(temp);
+        if(sortedEvent.size() > 0) {
+            if(sortedEvent.get(0).getStart() != 0 && isAttendeeInBoth(sortedEvent.get(0).getAttendees(), requestAtt, request)) {
+                tempRange = TimeRange.fromStartEnd(0, sortedEvent.get(0).getStart(), false);
+                finalTimeRange.add(tempRange);
+                tempRange = null;
+            }
         }
 
         for(int i = 0; i < sortedEvent.size(); i++) {
@@ -177,10 +191,10 @@ public final class FindMeetingQuery {
         return !arr.isEmpty() || isOptional(a, request);
     }
 
-    private boolean isMandatory(Collection<String> a, Collection<String> b) {
-        List<String> arr = new ArrayList<String>(a);
-        arr.retainAll(b);
-        return !arr.isEmpty();
+    private boolean isMandatory(Event event, MeetingRequest request) {
+        List<String> arr = new ArrayList<String>(event.getAttendees());
+        arr.retainAll(request.getAttendees());
+        return arr.size() != 0;
     }
 
     private boolean isOptional(Collection <String> a, MeetingRequest request) {
@@ -188,6 +202,24 @@ public final class FindMeetingQuery {
         arr.retainAll(request.getOptionalAttendees());
 
         return !arr.isEmpty();
+    }
+
+    private boolean isEventForOptionals(Event event, MeetingRequest request) {
+        List<String> requiredAtteendees = new ArrayList<String>(event.getAttendees());
+        requiredAtteendees.retainAll(request.getAttendees());
+        if(requiredAtteendees.size() != 0) {
+            System.out.println("g");
+            return false;
+        }
+
+        List<String> optionalAtteendees = new ArrayList<String>(event.getAttendees());
+        optionalAtteendees.retainAll(request.getOptionalAttendees());
+        if(optionalAtteendees.size() != 0) {
+            System.out.println("w");
+            return true;
+        }
+            System.out.println("b");
+        return false;
     }
 
     /**
