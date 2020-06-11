@@ -97,10 +97,6 @@ public final class Event {
     return when.end();
   }
 
-//   public void setEnd() {
-//       when = new TimeRange(when.start());
-//   }
-
   /**
    * Returns a read-only set of required attendees for this event.
    */
