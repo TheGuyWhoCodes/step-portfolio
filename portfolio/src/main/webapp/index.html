@@ -246,20 +246,32 @@
                 </form>
             </div>
             <div class = "comment-section" id = "comment-section">
-                <div class = "controls">
-                    <h5>Comments: </h5>
-                    <button onclick = "deleteAllComments()" type="submit" class="btn btn-primary"><i class="fas fa-trash-alt"></i> Delete All Comments</button>
-                    <div class = "form-controls">
-                        <small>Comment Amount: </small>
-                        <div class="input-group">
-                        <select id="comment-amount" class="form-control">
-                            <option>5</option>
-                            <option>10</option>
-                            <option>15</option>
-                        </select>            
-                        <span class="input-group-btn">
-                            <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Refresh Comments!"><i class="fas fa-retweet"></i></button>
-                        </span>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class = "controls">
+                                <h5>Comments: </h5>
+                                <button onclick = "deleteAllComments()" type="submit" class="btn btn-primary"><i class="fas fa-trash-alt"></i> Delete All Comments</button>
+                                <div class = "form-controls">
+                                    <small>Comment Amount: </small>
+                                    <div class="input-group">
+                                    <select id="comment-amount" class="form-control">
+                                        <option>5</option>
+                                        <option>10</option>
+                                        <option>15</option>
+                                    </select>            
+                                    <span class="input-group-btn">
+                                        <button onclick = "fetchComments()" class="btn btn-default" type="button" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Refresh Comments!"><i class="fas fa-retweet"></i></button>
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class = "statistics">
+                                <h6>Comment Statistics: </h6>
+                                <small>Comments without the letter E: </small> <small id = "e-stat"></small>
+                            </div>
                         </div>
                     </div>
                 </div>

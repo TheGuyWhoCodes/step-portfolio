@@ -237,6 +237,12 @@ p.small {
     margin: auto;
 }
 
+.statistics {
+    margin: auto;
+    margin-top: .3em;
+    text-align: center;
+}
+
 .delete {
     vertical-align: initial !important;
 }

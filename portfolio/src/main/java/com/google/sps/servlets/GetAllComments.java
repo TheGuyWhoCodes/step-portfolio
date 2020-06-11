@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import com.google.gson.Gson;
+
 import java.util.List;
 import java.util.Map;
 import com.google.common.util.concurrent.*;
@@ -66,11 +68,12 @@ import com.google.cloud.bigquery.Job;
 import com.google.cloud.bigquery.JobId;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.TableResult;
+import com.google.cloud.bigquery.*;
+import java.util.Map.Entry;
 import java.util.UUID;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
-@WebServlet("/data")
-public class DataServlet extends HttpServlet {
+@WebServlet("/getNumberofE")
+public class GetAllComments extends HttpServlet {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     private BigQuery bigquery = BigQueryOptions.getDefaultInstance().getService();
@@ -86,76 +89,43 @@ public class DataServlet extends HttpServlet {
         response.setContentType("application/json;");
         Gson gson = new Gson();
 
-        FetchOptions fetchOptions = FetchOptions.Builder.withLimit(Integer.parseInt(request.getParameter("amount")));
+        TableId tableId = TableId.of("comments", "newcomments");
 
-        Query query = new Query("comments");
-        PreparedQuery results = datastore.prepare(query);
-        String websafeCursor = request.getParameter("cursor");
-        if(null != websafeCursor) {
-            fetchOptions.startCursor(Cursor.fromWebSafeString(websafeCursor));
-        }
+        QueryJobConfiguration queryConfig =
+        QueryJobConfiguration.newBuilder(
+            "SELECT "
+                + "comment from `comments.newcomments` "
+                + "WHERE NOT (comment like '%e%')")
+        .setUseLegacySql(false)
+        .build();
 
-        ArrayList<HashMap<String, String>> output = new  ArrayList<HashMap<String, String>>();
-        for (Entity entity : results.asList(fetchOptions)) {
-            HashMap<String, String> newEntity = new HashMap<String, String>();
-            newEntity.put("name", htmlInjectionPreventer((String) entity.getProperty("name")));
-            newEntity.put("comment", htmlInjectionPreventer((String) entity.getProperty("comment")));
-            newEntity.put("score", (String) entity.getProperty("score"));
-            newEntity.put("id", String.valueOf(entity.getKey().getId()));
-            newEntity.put("image", (String) entity.getProperty("image"));
-            output.add(newEntity);
-        }
+        JobId jobId = JobId.of(UUID.randomUUID().toString());
+        Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
+        
         JSONObject json = new JSONObject();
-        
-        json.put("comments", output);
-        json.put("cursor", results.asQueryResultList(FetchOptions.Builder.withLimit(Integer.parseInt(request.getParameter("amount")))).getCursor().toWebSafeString());
-        
+
+        try {
+            queryJob = queryJob.waitFor();
+
+            // Check for errors
+            if (queryJob == null) {
+                throw new RuntimeException("Job no longer exists");
+            } else if (queryJob.getStatus().getError() != null) {
+                // You can also look at queryJob.getStatus().getExecutionErrors() for all
+                // errors, not just the latest one.
+                throw new RuntimeException(queryJob.getStatus().getError().toString());
+            }
+
+            TableResult result = queryJob.getQueryResults();
+
+            json.put("commentsWithoutE",result.getTotalRows());
+        } catch (Exception e) {
+            json.put("commentsWithoutE", "N/A");
+        }
         response.getWriter().println(gson.toJson(json));
     }
 
-
-	/**
-    *   this doPost() function will write the comments to the Datastore instance.
-    *   It reads in a name and comment from a query param to write to datastore
-    *   It has a similar rate limiter to the do get, if it sees more than 10 req /sec,
-    *   it'll pause and wait till the Rate Limit resets
-    *   request: the incoming user request, (should be empty as we use query params)
-    *   response: the response that we will send, normally nothing gets returned, only a 200 or 500
-    **/
-	@Override
-  	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("application/json;");
-                Gson gson = new Gson();
-        Document doc = Document.newBuilder()
-                .setContent(getPostComment(request))
-                .setType(Document.Type.PLAIN_TEXT)
-                .build();
-        LanguageServiceClient languageService = LanguageServiceClient.create();
-        Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
-        float score = sentiment.getScore();
-        languageService.close();
-        response.getWriter().println(gson.toJson( request.getParameter("image")));        
-
-        Entity taskEntity = new Entity("comments");
-        taskEntity.setProperty("name", getPostName(request));
-        taskEntity.setProperty("comment", getPostComment(request));
-        // taskEntity.setProperty("image", getUploadedFileUrl(request, "image"));
-        taskEntity.setProperty("score", String.valueOf(score));
-        datastore.put(taskEntity);
-
-
-        // BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-        // Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-        // List<BlobKey> blobKeys = blobs.get("image");
-
-
-        // // Our form only contains a single file input, so get the first index.
-        // BlobKey blobKey = blobKeys.get(0);
-
-        // blobstoreService.serve(blobKey, response);
-    }
-
-	/**
+    	/**
     *   getPostComment() is a helper function used to get the comment parameter of the body
     *   request: the incoming http request to parse it from.
     **/
@@ -181,30 +151,4 @@ public class DataServlet extends HttpServlet {
     private String htmlInjectionPreventer(String str) {
         return str.replace("<", "&lt;").replace(">", "&gt;");
     }
-
-  /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file. */
-  private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName) {
-    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    List<BlobKey> blobKeys = blobs.get(formInputElementName);
-
-    // User submitted form without selecting a file, so we can't get a URL. (dev server)
-    if (blobKeys == null || blobKeys.isEmpty()) {
-      return null;
-    }
-
-    // Our form only contains a single file input, so get the first index.
-    BlobKey blobKey = blobKeys.get(0);
-
-    // User submitted form without selecting a file, so we can't get a URL. (live server)
-    BlobInfo blobInfo = new BlobInfoFactory(datastore).loadBlobInfo(blobKey);
-    if (blobInfo.getSize() == 0) {
-      blobstoreService.delete(blobKey);
-      return null;
-    }
-
-    ImagesService imagesService = ImagesServiceFactory.getImagesService();
-    ServingUrlOptions options = ServingUrlOptions.Builder.withGoogleStorageFileName(blobInfo.getGsObjectName());
-    return imagesService.getServingUrl(options);
-  }
 }

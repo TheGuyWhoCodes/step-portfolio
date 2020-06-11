@@ -9,6 +9,7 @@ let container = document.getElementById('world');
 let w = container.offsetWidth;
 let h = container.offsetHeight;
 let comments = [];
+let cursor = "";
 
 renderer.setSize(w, h);
 container.appendChild(renderer.domElement);
@@ -80,6 +81,7 @@ function submitCommentForm() {
         formData.append("image", photo);                                
         formData.append("name", document.forms["comments"]["name"].value)
         formData.append("comment", document.forms["comments"]["comment"].value);
+        formData.append("cursor", cursor);
 
         disableButton();
         var xhr = new XMLHttpRequest();
@@ -122,18 +124,21 @@ $('#comments').submit(function (evt) {
 
 window.onload = () => {
 	fetchComments();
+    getEStatstic();
 }
 
 // fetch comments is used to GET comments from our API
 // appends the results over to the html
 fetchComments = function () {
     var amount = {
-        amount: document.getElementById( "comment-amount" ).value 
+        amount: document.getElementById( "comment-amount" ).value,
+        cursor: cursor
     }	
     document.getElementById("raw-comments").innerHTML = '';
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
-        comments = resp;
-        for(comment of resp) {
+        comments = resp["comments"];
+        cursor = resp["cursor"];
+        for(comment of comments) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append
             let newComment = document.createElement("div")
@@ -160,6 +165,12 @@ returnFeelingEmoji = function(score) {
     } else {
         return `😐 ${score}`
     }
+}
+
+getEStatstic = function() {
+    fetch('/getNumberofE').then(e => e.json()).then((response) => {
+        document.getElementById("e-stat").textContent = (response["commentsWithoutE"]);
+    })
 }
 
 deleteComment = function(id) {
