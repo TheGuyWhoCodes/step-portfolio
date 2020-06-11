@@ -143,16 +143,6 @@ public class DataServlet extends HttpServlet {
         taskEntity.setProperty("score", String.valueOf(score));
         datastore.put(taskEntity);
 
-
-        // BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-        // Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-        // List<BlobKey> blobKeys = blobs.get("image");
-
-
-        // // Our form only contains a single file input, so get the first index.
-        // BlobKey blobKey = blobKeys.get(0);
-
-        // blobstoreService.serve(blobKey, response);
     }
 
 	/**
