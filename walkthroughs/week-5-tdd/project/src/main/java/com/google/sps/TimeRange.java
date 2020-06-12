@@ -46,8 +46,8 @@ public final class TimeRange {
     }
   };
 
-  private final int start;
-  private final int duration;
+  private int start;
+  private int duration;
 
   private TimeRange(int start, int duration) {
     this.start = start;
@@ -75,6 +75,11 @@ public final class TimeRange {
     return start + duration;
   }
 
+  public void setEnd(int start, int end) {
+      this.start = start;
+      this.duration = end - start;
+  }
+
   /**
    * Checks if two ranges overlap. This means that at least some part of one range falls within the
    * bounds of another range.
@@ -90,6 +95,10 @@ public final class TimeRange {
     // Case 3: |---------|
     //            |---|
     return this.contains(other.start) || other.contains(this.start);
+  }
+
+  public static boolean overlaps(TimeRange a, TimeRange b) {
+    return a.contains(b.start) || b.contains(a.start);
   }
 
   /**
