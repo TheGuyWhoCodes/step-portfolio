@@ -107,6 +107,33 @@ function submitCommentForm() {
     }
 }
 
+loadMoreComments = function() {
+    var amount = {
+        amount: document.getElementById( "comment-amount" ).value,
+        cursor: cursor
+    }	
+    fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
+        comments += resp["comments"];
+        cursor = resp["cursor"];
+        for(comment of resp["comments"]) {
+            commentSection = document.getElementById("raw-comments");
+            // Creates the new comment div class to append
+            let newComment = document.createElement("div")
+            newComment.classList.add("comment")
+
+            // The actual html, uses the string formatting tool to append it
+            newComment.innerHTML = (`
+            	<button class="btn btn-primary delete" onclick='deleteComment("${comment["id"]}")'>
+                    <i class="fas fa-trash-alt"></i>
+                </button> 
+                <b>${comment['name']}</b> wrote ${comment['comment']}
+                <br><small>This commenter is feeling: ${returnFeelingEmoji(comment["score"])}</small>
+            `)
+            commentSection.appendChild(newComment)
+        }
+    })
+}
+
 enableButton = function() {
     $("#btn-submit").prop("disabled", false);
     $("#btn-submit").html(`Submit`);
@@ -132,12 +159,16 @@ window.onload = () => {
 fetchComments = function () {
     var amount = {
         amount: document.getElementById( "comment-amount" ).value,
-        cursor: cursor
+        cursor: ""
     }	
-    document.getElementById("raw-comments").innerHTML = '';
+    document.getElementById("raw-comments").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments = resp["comments"];
         cursor = resp["cursor"];
+        if(resp["comments"].length == 0) {
+            document.getElementById("load-more").style.display = "none";
+        }
         for(comment of comments) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append

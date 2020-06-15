@@ -91,7 +91,7 @@ public class DataServlet extends HttpServlet {
         Query query = new Query("comments");
         PreparedQuery results = datastore.prepare(query);
         String websafeCursor = request.getParameter("cursor");
-        if(null != websafeCursor) {
+        if("" != websafeCursor) {
             fetchOptions.startCursor(Cursor.fromWebSafeString(websafeCursor));
         }
 
@@ -108,7 +108,7 @@ public class DataServlet extends HttpServlet {
         JSONObject json = new JSONObject();
         
         json.put("comments", output);
-        json.put("cursor", results.asQueryResultList(FetchOptions.Builder.withLimit(Integer.parseInt(request.getParameter("amount")))).getCursor().toWebSafeString());
+        json.put("cursor", results.asQueryResultList(fetchOptions).getCursor().toWebSafeString());
         
         response.getWriter().println(gson.toJson(json));
     }

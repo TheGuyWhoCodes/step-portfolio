@@ -153,8 +153,10 @@ h3 {
     width:80%;
 }
 
-.form-controls {
-    width:50%;
+.load-more {
+     cursor:pointer;
+     color:blue;
+     text-align:center;
 }
 
 .portfolio-card article p {
