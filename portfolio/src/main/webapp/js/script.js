@@ -115,6 +115,9 @@ loadMoreComments = function() {
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments += resp["comments"];
         cursor = resp["cursor"];
+        if(resp["comments"].length == 0) {
+            document.getElementById("load-more").style.display = "none";
+        }
         for(comment of resp["comments"]) {
             commentSection = document.getElementById("raw-comments");
             // Creates the new comment div class to append
@@ -141,7 +144,7 @@ enableButton = function() {
 
 disableButton = function() {
     $("#btn-submit").prop("disabled", true);
-    $("#btn-submit").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting Comment...`);
+    $("#btn-submit").html(`<span id = "loader" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting Comment...`);
 }
 
 // Used to prevent default redirect behavior
@@ -151,7 +154,7 @@ $('#comments').submit(function (evt) {
 
 window.onload = () => {
 	fetchComments();
-    getEStatstic();
+    // getEStatstic();
 }
 
 // fetch comments is used to GET comments from our API
@@ -161,7 +164,7 @@ fetchComments = function () {
         amount: document.getElementById( "comment-amount" ).value,
         cursor: ""
     }	
-    document.getElementById("raw-comments").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    document.getElementById("raw-comments").innerHTML = '<span id = "loader" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
     fetch(endpoint + formatParams(amount)).then(e => e.json()).then((resp) => {
         comments = resp["comments"];
@@ -183,8 +186,14 @@ fetchComments = function () {
                 <b>${comment['name']}</b> wrote ${comment['comment']}
                 <br><small>This commenter is feeling: ${returnFeelingEmoji(comment["score"])}</small>
             `)
+            if(comment["image"] != null) {
+                let commentImage = document.createElement("img");
+                commentImage.src = comment["image"];
+                newComment.appendChild(commentImage);
+            }
             commentSection.appendChild(newComment)
         }
+        document.getElementById("loader").remove();
     })
 }
 
